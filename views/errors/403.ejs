@@ -1,0 +1,18 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-xl mx-auto my-12 bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+  <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
+    <i class="fa-solid fa-ban"></i>
+  </div>
+  <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-2">403 - Akses Ditolak (Forbidden)</h1>
+  <p class="text-slate-600 mb-6 leading-relaxed">
+    <%= typeof message !== 'undefined' ? message : 'Anda tidak memiliki hak akses atau izin untuk melihat halaman ini.' %>
+  </p>
+  <div class="flex items-center justify-center space-x-3">
+    <a href="/dashboard" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition-colors shadow-sm inline-flex items-center">
+      <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Dashboard
+    </a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

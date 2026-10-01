@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-blue-50/40 to-slate-200 text-slate-800 antialiased min-h-screen flex items-center justify-center p-4 sm:p-6">
+
+  <div class="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+    
+    <!-- Left Column: Branding & Project Overview -->
+    <div class="lg:col-span-6 space-y-6">
+      
+      <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-blue-100 text-blue-800 text-xs font-bold border border-blue-200">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>SMK Telkom — Standar UKK & Industri</span>
+      </div>
+
+      <div class="space-y-2">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+          Sistem Peminjaman Sarpras <span class="text-blue-600">Lab RPL & Elektronika</span>
+        </h1>
+        <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+          Platform terpadu sirkulasi peralatan praktikum, monitoring stok alat, inspeksi kondisi fisik, pencatatan denda kerusakan, dan audit log sirkulasi laboratorium.
+        </p>
+      </div>
+
+      <!-- Quick Switch Demo Role Section (Mempermudah Penguji UKK) -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+            <i class="fa-solid fa-bolt text-amber-500 mr-1.5"></i> Fast Switch Demo Login (1-Klik)
+          </span>
+          <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">3 Level RBAC</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <!-- Demo Admin -->
+          <a href="/login/demo/ADMIN" class="flex flex-col items-center justify-center p-3 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-900 transition-all text-center group">
+            <i class="fa-solid fa-shield-halved text-xl text-purple-600 mb-1 group-hover:scale-110 transition-transform"></i>
+            <span class="font-bold text-xs">Admin (Kepala Lab)</span>
+            <span class="text-[10px] text-purple-600">Full Master & Log</span>
+          </a>
+
+          <!-- Demo Toolman -->
+          <a href="/login/demo/TOOLMAN" class="flex flex-col items-center justify-center p-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 transition-all text-center group">
+            <i class="fa-solid fa-screwdriver-wrench text-xl text-amber-600 mb-1 group-hover:scale-110 transition-transform"></i>
+            <span class="font-bold text-xs">Toolman / Laboran</span>
+            <span class="text-[10px] text-amber-600">Approval & Denda</span>
+          </a>
+
+          <!-- Demo Peminjam -->
+          <a href="/login/demo/PEMINJAM" class="flex flex-col items-center justify-center p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 transition-all text-center group">
+            <i class="fa-solid fa-user-graduate text-xl text-emerald-600 mb-1 group-hover:scale-110 transition-transform"></i>
+            <span class="font-bold text-xs">Peminjam (Siswa)</span>
+            <span class="text-[10px] text-emerald-600">Katalog & Pinjam</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Feature Badges -->
+      <div class="grid grid-cols-2 gap-3 text-xs text-slate-600">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-circle-check text-blue-600"></i>
+          <span>Approval & Pengembalian Alat</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-circle-check text-blue-600"></i>
+          <span>Inspeksi Fisik & Hitung Denda</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-circle-check text-blue-600"></i>
+          <span>Cetak Laporan Format Resmi</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-circle-check text-blue-600"></i>
+          <span>Audit Log Sirkulasi Otomatis</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Login Card Form -->
+    <div class="lg:col-span-6">
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/60 border border-slate-200">
+        
+        <div class="mb-6">
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Masuk ke Akun Anda</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">Gunakan akun terdaftar atau tombol demo di samping.</p>
+        </div>
+
+        <!-- Alert Notifications -->
+        <% if (error) { %>
+          <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-start space-x-2.5">
+            <i class="fa-solid fa-circle-exclamation text-rose-500 mt-0.5"></i>
+            <span><%= error %></span>
+          </div>
+        <% } %>
+
+        <% if (success) { %>
+          <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-start space-x-2.5">
+            <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+            <span><%= success %></span>
+          </div>
+        <% } %>
+
+        <form action="/login" method="POST" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5" for="username">
+              Username
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <input 
+                type="text" 
+                id="username" 
+                name="username" 
+                required 
+                placeholder="admin / toolman / peminjam"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400 bg-slate-50/50 focus:bg-white"
+              >
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider" for="password">
+                Password
+              </label>
+              <span class="text-xs text-slate-400">Default: password123</span>
+            </div>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                required 
+                placeholder="••••••••"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400 bg-slate-50/50 focus:bg-white"
+              >
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-600/30 hover:shadow-lg transition-all flex items-center justify-center space-x-2"
+          >
+            <span>Masuk ke Dashboard</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <!-- Kredensial Pengujian Akun -->
+        <div class="mt-6 pt-5 border-t border-slate-100 text-center">
+          <p class="text-[11px] text-slate-500 mb-2">Daftar Akun Pengujian (Password semua akun: <code class="font-mono text-blue-600 font-bold">password123</code>)</p>
+          <div class="flex flex-wrap justify-center gap-1.5 text-[10px] text-slate-600 font-mono">
+            <span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">admin (Admin)</span>
+            <span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">toolman (Laboran)</span>
+            <span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">peminjam (Siswa)</span>
+            <span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">guru_rpl (Guru)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

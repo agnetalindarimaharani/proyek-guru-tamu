@@ -1,0 +1,187 @@
+<%- include('../partials/header') %>
+
+<div class="space-y-6">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kategori Alat Praktikum Lab</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">Pengelompokan sarana laboratorium: Jaringan Komputer, Elektronika & IoT, Multimedia, dan Hand Tools.</p>
+    </div>
+    <button 
+      type="button" 
+      onclick="openModal('addCategoryModal')"
+      class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all inline-flex items-center space-x-2 self-start sm:self-auto"
+    >
+      <i class="fa-solid fa-folder-plus"></i>
+      <span>Tambah Kategori Baru</span>
+    </button>
+  </div>
+
+  <!-- Alerts -->
+  <% if (typeof success !== 'undefined' && success) { %>
+    <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-start space-x-2">
+      <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+      <span><%= success %></span>
+    </div>
+  <% } %>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-start space-x-2">
+      <i class="fa-solid fa-circle-exclamation text-rose-500 mt-0.5"></i>
+      <span><%= error %></span>
+    </div>
+  <% } %>
+
+  <!-- Categories Table -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-600">
+        <thead class="bg-slate-50 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+          <tr>
+            <th class="py-3 px-4">ID</th>
+            <th class="py-3 px-4">Nama Kategori</th>
+            <th class="py-3 px-4 text-center">Jumlah Alat Praktikum</th>
+            <th class="py-3 px-4 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium">
+          <% if (categories.length === 0) { %>
+            <tr>
+              <td colspan="4" class="py-8 text-center text-slate-400">Belum ada kategori yang dibuat.</td>
+            </tr>
+          <% } else { %>
+            <% categories.forEach(cat => { %>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="py-3 px-4 font-mono font-bold text-slate-400">
+                  #<%= cat.id %>
+                </td>
+                <td class="py-3 px-4">
+                  <div class="font-bold text-slate-900 text-sm"><%= cat.namaKategori %></div>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold font-mono <%= cat._count.tools > 0 ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-500' %>">
+                    <%= cat._count.tools %> Item Alat
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <div class="flex items-center justify-center space-x-1.5">
+                    <!-- Edit Button -->
+                    <button 
+                      type="button" 
+                      onclick="openEditCategoryModal('<%= cat.id %>', '<%= cat.namaKategori %>')"
+                      class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition-colors"
+                      title="Edit Kategori"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+
+                    <!-- Delete Button -->
+                    <form action="/categories/<%= cat.id %>/delete" method="POST" onsubmit="return confirm('Hapus kategori <%= cat.namaKategori %>?');">
+                      <button 
+                        type="submit" 
+                        class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors"
+                        title="Hapus Kategori"
+                      >
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Tambah Kategori -->
+<div id="addCategoryModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-folder-plus"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-900">Tambah Kategori Baru</h3>
+      </div>
+      <button type="button" onclick="closeModal('addCategoryModal')" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form action="/categories/create" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Kategori</label>
+        <input 
+          type="text" 
+          name="namaKategori" 
+          required 
+          placeholder="Contoh: Robotika & Sensor" 
+          class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        >
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2">
+        <button type="button" onclick="closeModal('addCategoryModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">
+          Batal
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20">
+          Simpan Kategori
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Edit Kategori -->
+<div id="editCategoryModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-900">Edit Kategori</h3>
+      </div>
+      <button type="button" onclick="closeModal('editCategoryModal')" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form id="editCategoryForm" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Kategori</label>
+        <input 
+          type="text" 
+          name="namaKategori" 
+          id="editNamaKategori" 
+          required 
+          class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        >
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2">
+        <button type="button" onclick="closeModal('editCategoryModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">
+          Batal
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20">
+          Perbarui Kategori
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openEditCategoryModal(id, nama) {
+    document.getElementById('editCategoryForm').action = '/categories/' + id + '/update';
+    document.getElementById('editNamaKategori').value = nama;
+    openModal('editCategoryModal');
+  }
+</script>
+
+<%- include('../partials/footer') %>

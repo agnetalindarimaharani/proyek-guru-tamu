@@ -1,0 +1,406 @@
+<%- include('../partials/header') %>
+
+<div class="space-y-6">
+  
+  <!-- Welcome Banner -->
+  <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-slate-800 rounded-2xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+    <div class="relative z-10 max-w-2xl">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-100 text-xs font-bold border border-amber-300/30 mb-3">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+        <span>MEJA KERJA TOOLMAN & LABORAN LAB</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Halo, <%= user.nama %></h1>
+      <p class="text-amber-100 text-sm mt-1 leading-relaxed">
+        Kelola sirkulasi harian: verifikasi persetujuan peminjaman siswa, inspeksi fisik alat kembali, input denda jika ada kerusakan, dan cetak berita acara sirkulasi.
+      </p>
+    </div>
+    <div class="absolute -right-10 -bottom-10 opacity-15 text-white text-9xl pointer-events-none hidden sm:block">
+      <i class="fa-solid fa-clipboard-check"></i>
+    </div>
+  </div>
+
+  <!-- Metric Statistics Cards -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    
+    <!-- Stat 1: Pending Approvals -->
+    <div class="bg-white p-5 rounded-2xl border <%= stats.pendingApprovals > 0 ? 'border-amber-400 ring-2 ring-amber-100' : 'border-slate-200' %> shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Menunggu Persetujuan</p>
+        <p class="text-2xl font-black text-amber-600 mt-1"><%= stats.pendingApprovals %></p>
+        <span class="text-[11px] font-semibold text-amber-700">Perlu Verifikasi Toolman</span>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+        <i class="fa-solid fa-hourglass-half"></i>
+      </div>
+    </div>
+
+    <!-- Stat 2: Sedang Dipinjam -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Sedang Dipinjam</p>
+        <p class="text-2xl font-black text-blue-600 mt-1"><%= stats.activeLoans %></p>
+        <span class="text-[11px] font-semibold text-blue-700">Alat di Meja Praktikum</span>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+        <i class="fa-solid fa-handshake"></i>
+      </div>
+    </div>
+
+    <!-- Stat 3: Dikembalikan Hari Ini -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Kembali Hari Ini</p>
+        <p class="text-2xl font-black text-emerald-600 mt-1"><%= stats.returnedToday %></p>
+        <span class="text-[11px] font-semibold text-emerald-700">Telah Diinspeksi</span>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+    </div>
+
+    <!-- Stat 4: Total Master Alat -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Item Alat</p>
+        <p class="text-2xl font-black text-slate-900 mt-1"><%= stats.totalTools %></p>
+        <span class="text-[11px] font-semibold text-slate-500">Peralatan Terdaftar</span>
+      </div>
+      <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-xl">
+        <i class="fa-solid fa-boxes-stacked"></i>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Section 1: Daftar Permohonan Peminjaman Menunggu Persetujuan (Pending Approvals) -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-amber-50/40">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold">
+          <i class="fa-solid fa-bell"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Permohonan Pinjam Masuk (Pending Approval)</h2>
+          <p class="text-xs text-slate-500">Setujui permohonan siswa agar stok alat di lab otomatis dipotong untuk praktikum.</p>
+        </div>
+      </div>
+      <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+        <%= recentPendingList.length %> Antrean
+      </span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-600">
+        <thead class="bg-slate-50 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+          <tr>
+            <th class="py-3 px-4">Peminjam</th>
+            <th class="py-3 px-4">Alat Diminta</th>
+            <th class="py-3 px-4">Jumlah Pinjam</th>
+            <th class="py-3 px-4">Sisa Stok Lab</th>
+            <th class="py-3 px-4">Rencana Kembali</th>
+            <th class="py-3 px-4">Catatan / Keperluan</th>
+            <th class="py-3 px-4 text-center">Aksi Toolman</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium">
+          <% if (recentPendingList.length === 0) { %>
+            <tr>
+              <td colspan="7" class="py-8 text-center text-slate-400">
+                <i class="fa-solid fa-circle-check text-2xl text-emerald-400 mb-2 block"></i>
+                Tidak ada permohonan pinjam yang menunggu persetujuan. Semua aman!
+              </td>
+            </tr>
+          <% } else { %>
+            <% recentPendingList.forEach(item => { %>
+              <tr class="hover:bg-amber-50/20 transition-colors">
+                <td class="py-3 px-4">
+                  <p class="font-bold text-slate-900"><%= item.user.nama %></p>
+                  <p class="text-[10px] text-slate-400 font-mono">NISN: <%= item.user.nisn || '-' %> • Telp: <%= item.user.telepon || '-' %></p>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-slate-800"><%= item.tool.namaAlat %></span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="px-2 py-0.5 rounded font-bold bg-blue-100 text-blue-800 font-mono"><%= item.jumlah %> Unit</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold font-mono <%= item.tool.stok >= item.jumlah ? 'text-emerald-600' : 'text-rose-600' %>">
+                    <%= item.tool.stok %> Unit
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="text-slate-700 font-semibold"><%= formatDate(item.tglKembaliRencana) %></span>
+                </td>
+                <td class="py-3 px-4 max-w-xs">
+                  <span class="text-slate-500 italic"><%= item.catatan || 'Praktikum Reguler' %></span>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <div class="flex items-center justify-center space-x-2">
+                    <!-- Form Setujui (Approve) -->
+                    <form action="/borrowings/<%= item.id %>/approve" method="POST" onsubmit="return confirm('Apakah Anda yakin menyetujui peminjaman ini? Stok alat akan otomatis berkurang.');">
+                      <button 
+                        type="submit" 
+                        class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-colors flex items-center space-x-1"
+                        <%= item.tool.stok < item.jumlah ? 'disabled title="Stok alat tidak mencukupi!"' : '' %>
+                      >
+                        <i class="fa-solid fa-check"></i>
+                        <span>Setujui</span>
+                      </button>
+                    </form>
+
+                    <!-- Tombol Modal Tolak -->
+                    <button 
+                      type="button" 
+                      onclick="openRejectModal(this)"
+                      data-id="<%= item.id %>"
+                      data-tool-name="<%= item.tool.namaAlat %>"
+                      data-user-name="<%= item.user.nama %>"
+                      class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition-colors flex items-center space-x-1"
+                    >
+                      <i class="fa-solid fa-xmark"></i>
+                      <span>Tolak</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Section 2: Alat Sedang Dipinjam & Pengembalian -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Alat Sedang Dipakai Siswa (Menunggu Pengembalian)</h2>
+          <p class="text-xs text-slate-500">Lakukan inspeksi fisik saat alat dikembalikan ke meja piket.</p>
+        </div>
+      </div>
+      <a href="/reports" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors inline-flex items-center space-x-1.5">
+        <i class="fa-solid fa-print"></i>
+        <span>Cetak Berita Acara</span>
+      </a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-600">
+        <thead class="bg-slate-50 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+          <tr>
+            <th class="py-3 px-4">Peminjam</th>
+            <th class="py-3 px-4">Alat Praktikum</th>
+            <th class="py-3 px-4">Jumlah</th>
+            <th class="py-3 px-4">Tgl Pinjam</th>
+            <th class="py-3 px-4">Batas Pengembalian</th>
+            <th class="py-3 px-4 text-center">Aksi Pengembalian</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium">
+          <% if (recentActiveList.length === 0) { %>
+            <tr>
+              <td colspan="6" class="py-8 text-center text-slate-400">Tidak ada alat yang sedang dipinjam saat ini. Semua alat berada di rak lab.</td>
+            </tr>
+          <% } else { %>
+            <% recentActiveList.forEach(item => { %>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="py-3 px-4">
+                  <p class="font-bold text-slate-900"><%= item.user.nama %></p>
+                  <p class="text-[10px] text-slate-400 font-mono"><%= item.user.username %></p>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-slate-800"><%= item.tool.namaAlat %></span>
+                </td>
+                <td class="py-3 px-4 font-mono font-bold text-slate-800">
+                  <%= item.jumlah %> Unit
+                </td>
+                <td class="py-3 px-4">
+                  <%= formatDate(item.tglPinjam) %>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-semibold text-slate-800"><%= formatDate(item.tglKembaliRencana) %></span>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <button 
+                    type="button" 
+                    onclick="openReturnInspectionModal(this)"
+                    data-id="<%= item.id %>"
+                    data-tool-name="<%= item.tool.namaAlat %>"
+                    data-user-name="<%= item.user.nama %>"
+                    data-qty="<%= item.jumlah %>"
+                    class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-colors inline-flex items-center space-x-1.5"
+                  >
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span>Inspeksi Fisik & Kembalikan</span>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Tolak Peminjaman -->
+<div id="rejectModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <h3 class="font-bold text-base text-slate-900">Tolak Permohonan Pinjam</h3>
+      <button type="button" onclick="closeModal('rejectModal')" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form id="rejectForm" method="POST" class="space-y-4">
+      <p class="text-xs text-slate-600">
+        Anda akan menolak permohonan pinjam alat <strong id="rejectToolName" class="text-slate-900"></strong> oleh <strong id="rejectUserName" class="text-slate-900"></strong>.
+      </p>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Alasan Penolakan</label>
+        <textarea 
+          name="alasan" 
+          rows="3" 
+          required 
+          placeholder="Contoh: Alat sedang dipersiapkan untuk ujian kompetensi atau jadwal lab bentrok."
+          class="w-full p-3 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none"
+        ></textarea>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2">
+        <button type="button" onclick="closeModal('rejectModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">
+          Batal
+        </button>
+        <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm">
+          Tolak Permohonan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Inspeksi Fisik & Terima Pengembalian (Fitur 8 & 9) -->
+<div id="returnInspectionModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-microscope"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-900">Inspeksi Fisik & Terima Pengembalian</h3>
+      </div>
+      <button type="button" onclick="closeModal('returnInspectionModal')" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form id="returnForm" method="POST" class="space-y-4">
+      <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
+        <p><span class="text-slate-500">Nama Peminjam:</span> <strong id="returnUserName" class="text-slate-900"></strong></p>
+        <p><span class="text-slate-500">Alat Dikembalikan:</span> <strong id="returnToolName" class="text-slate-900"></strong> (<span id="returnQty"></span> Unit)</p>
+      </div>
+
+      <!-- Pilihan Kondisi Fisik -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Hasil Pemeriksaan Kondisi Fisik Alat</label>
+        <select 
+          name="kondisiKembali" 
+          id="kondisiKembaliSelect" 
+          onchange="handleKondisiChange(this.value)"
+          class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold"
+        >
+          <option value="BAIK">✅ BAIK (Kondisi utuh, bersih, dan berfungsi normal)</option>
+          <option value="RUSAK">⚠️ RUSAK (Cacat fisik, patah, konslet, atau tidak berfungsi)</option>
+          <option value="HILANG">❌ HILANG (Alat/komponen tidak dikembalikan siswa)</option>
+        </select>
+      </div>
+
+      <!-- Input Nominal Denda (Khusus Rusak/Hilang) -->
+      <div id="dendaContainer" class="p-3 bg-rose-50/70 border border-rose-200 rounded-xl space-y-2">
+        <label class="block text-xs font-bold text-rose-800 uppercase">
+          Nominal Denda Kerusakan / Ganti Rugi (Rp)
+        </label>
+        <input 
+          type="number" 
+          name="denda" 
+          id="dendaInput"
+          min="0" 
+          step="5000" 
+          value="0" 
+          class="w-full p-2.5 rounded-xl border border-rose-300 text-xs font-mono font-bold text-rose-900 focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white"
+        >
+        <p class="text-[11px] text-rose-600">
+          * Masukkan 0 jika kondisi fisik alat BAIK. Masukkan biaya servis/penggantian jika RUSAK atau HILANG.
+        </p>
+      </div>
+
+      <!-- Catatan Inspeksi Detail -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Catatan Hasil Pemeriksaan Fisik</label>
+        <textarea 
+          name="catatanKondisi" 
+          rows="2" 
+          placeholder="Contoh: Kabel power lengkap, port RJ45 utuh, tidak ada lecet atau bau terbakar."
+          class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        ></textarea>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2">
+        <button type="button" onclick="closeModal('returnInspectionModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">
+          Batal
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20">
+          Simpan & Catat di Buku Sirkulasi
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openRejectModal(btn) {
+    const id = btn.getAttribute('data-id');
+    const toolName = btn.getAttribute('data-tool-name');
+    const userName = btn.getAttribute('data-user-name');
+
+    document.getElementById('rejectForm').action = '/borrowings/' + id + '/reject';
+    document.getElementById('rejectToolName').innerText = toolName;
+    document.getElementById('rejectUserName').innerText = userName;
+    openModal('rejectModal');
+  }
+
+  function openReturnInspectionModal(btn) {
+    const id = btn.getAttribute('data-id');
+    const toolName = btn.getAttribute('data-tool-name');
+    const userName = btn.getAttribute('data-user-name');
+    const qty = btn.getAttribute('data-qty');
+
+    document.getElementById('returnForm').action = '/borrowings/' + id + '/return';
+    document.getElementById('returnToolName').innerText = toolName;
+    document.getElementById('returnUserName').innerText = userName;
+    document.getElementById('returnQty').innerText = qty;
+    document.getElementById('kondisiKembaliSelect').value = 'BAIK';
+    document.getElementById('dendaInput').value = '0';
+    openModal('returnInspectionModal');
+  }
+
+  function handleKondisiChange(val) {
+    const dendaInput = document.getElementById('dendaInput');
+    if (val === 'RUSAK') {
+      if (dendaInput.value === '0') dendaInput.value = '25000';
+    } else if (val === 'HILANG') {
+      if (dendaInput.value === '0') dendaInput.value = '100000';
+    } else {
+      dendaInput.value = '0';
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

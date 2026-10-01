@@ -1,24 +1,49 @@
-    </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container footer-content">
-      <div>
-        <p><strong>SEWA AJA</strong> — Sistem Operasional Persewaan Busana Tradisional, Kebaya & Jas</p>
-        <p style="margin-top: 0.2rem; font-size: 0.8rem;">
-          Workshop Guru Tamu Industri: <em>AI-Driven Code & Culture (PjBL RPL)</em> — <strong>SMK Telkom Lampung $\times$ Lampung Dev (2026)</strong>
-        </p>
+  <!-- Footer Section -->
+  <footer class="bg-white border-t border-slate-200 mt-auto py-6 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-slate-800">SARPRAS LAB RPL & ELEKTRONIKA</span>
+        <span>•</span>
+        <span>Standar Uji Kompetensi Keahlian (UKK) & Industri</span>
       </div>
-      <div class="footer-links">
-        <a href="/">Dashboard</a>
-        <a href="/items">Katalog Busana</a>
-        <a href="/rentals">Transaksi Sewa</a>
-        <a href="https://codeathome.id/workshop-pjbl-smk-telkom-day-2" target="_blank" rel="noopener">Portal Tugas ↗</a>
+      <div>
+        <span>Sistem Informasi Sirkulasi & Inventaris Praktikum Lab Komputer SMK Telkom</span>
       </div>
     </div>
   </footer>
 
-  <script src="/js/main.js"></script>
+  <!-- Generic Helper JavaScript for Modals & Dropdowns -->
+  <script>
+    // Fungsi pembuka modal
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    // Fungsi penutup modal
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+      }
+    }
+
+    // Tutup modal jika user klik background backdrop
+    window.addEventListener('click', function(event) {
+      if (event.target.classList.contains('modal-backdrop')) {
+        event.target.classList.add('hidden');
+        event.target.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+      }
+    });
+  </script>
 </body>
 </html>

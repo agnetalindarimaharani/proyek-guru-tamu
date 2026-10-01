@@ -1,0 +1,300 @@
+<%- include('../partials/header') %>
+
+<div class="space-y-6">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Manajemen Pengguna (User RBAC)</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">Kelola data login dan hak akses pengguna sistem laboratorium: Admin, Toolman, dan Siswa/Guru.</p>
+    </div>
+    <button 
+      type="button" 
+      onclick="openModal('addUserModal')"
+      class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all inline-flex items-center space-x-2 self-start sm:self-auto"
+    >
+      <i class="fa-solid fa-user-plus"></i>
+      <span>Tambah Pengguna Baru</span>
+    </button>
+  </div>
+
+  <!-- Alerts -->
+  <% if (typeof success !== 'undefined' && success) { %>
+    <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-start space-x-2">
+      <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+      <span><%= success %></span>
+    </div>
+  <% } %>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-start space-x-2">
+      <i class="fa-solid fa-circle-exclamation text-rose-500 mt-0.5"></i>
+      <span><%= error %></span>
+    </div>
+  <% } %>
+
+  <!-- Search & Role Filter Bar -->
+  <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+    <form action="/users" method="GET" class="w-full sm:w-auto flex-grow flex flex-col sm:flex-row gap-2">
+      <div class="relative flex-grow max-w-md">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+        <input 
+          type="text" 
+          name="search" 
+          value="<%= search %>" 
+          placeholder="Cari nama, username, atau NISN..." 
+          class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        >
+      </div>
+
+      <select 
+        name="role" 
+        onchange="this.form.submit()" 
+        class="py-2 px-3 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-slate-700"
+      >
+        <option value="">Semua Level Role</option>
+        <option value="ADMIN" <%= filterRole === 'ADMIN' ? 'selected' : '' %>>Admin (Kepala Lab)</option>
+        <option value="TOOLMAN" <%= filterRole === 'TOOLMAN' ? 'selected' : '' %>>Toolman (Laboran)</option>
+        <option value="PEMINJAM" <%= filterRole === 'PEMINJAM' ? 'selected' : '' %>>Peminjam (Siswa/Guru)</option>
+      </select>
+
+      <button type="submit" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors">
+        Filter
+      </button>
+      <% if (search || filterRole) { %>
+        <a href="/users" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors text-center">
+          Reset
+        </a>
+      <% } %>
+    </form>
+    <div class="text-xs text-slate-500 whitespace-nowrap">
+      Total: <strong class="text-slate-800"><%= users.length %></strong> Pengguna
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-600">
+        <thead class="bg-slate-50 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+          <tr>
+            <th class="py-3 px-4">Nama Lengkap</th>
+            <th class="py-3 px-4">Username</th>
+            <th class="py-3 px-4">Role Akses</th>
+            <th class="py-3 px-4">NISN / Identitas</th>
+            <th class="py-3 px-4">No. Telepon</th>
+            <th class="py-3 px-4 text-center">Transaksi</th>
+            <th class="py-3 px-4 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium">
+          <% if (users.length === 0) { %>
+            <tr>
+              <td colspan="7" class="py-8 text-center text-slate-400">Tidak ada data pengguna yang sesuai pencarian.</td>
+            </tr>
+          <% } else { %>
+            <% users.forEach(u => { %>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="py-3 px-4">
+                  <div class="font-bold text-slate-900"><%= u.nama %></div>
+                  <div class="text-[10px] text-slate-400">ID: <%= u.id %></div>
+                </td>
+                <td class="py-3 px-4 font-mono font-semibold text-slate-700">
+                  @<%= u.username %>
+                </td>
+                <td class="py-3 px-4">
+                  <% if (u.role === 'ADMIN') { %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                      ADMIN
+                    </span>
+                  <% } else if (u.role === 'TOOLMAN') { %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                      TOOLMAN
+                    </span>
+                  <% } else { %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      PEMINJAM
+                    </span>
+                  <% } %>
+                </td>
+                <td class="py-3 px-4 font-mono">
+                  <%= u.nisn || '-' %>
+                </td>
+                <td class="py-3 px-4">
+                  <%= u.telepon || '-' %>
+                </td>
+                <td class="py-3 px-4 text-center font-mono">
+                  <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold">
+                    <%= u._count.borrowings %>
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <div class="flex items-center justify-center space-x-1.5">
+                    <!-- Edit Button -->
+                    <button 
+                      type="button" 
+                      onclick="openEditUserModal('<%= u.id %>', '<%= u.username %>', '<%= u.nama %>', '<%= u.role %>', '<%= u.nisn || '' %>', '<%= u.telepon || '' %>')"
+                      class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition-colors"
+                      title="Edit Pengguna"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+
+                    <!-- Delete Button -->
+                    <% if (u.id !== user.id) { %>
+                      <form action="/users/<%= u.id %>/delete" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna <%= u.nama %>?');">
+                        <button 
+                          type="submit" 
+                          class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors"
+                          title="Hapus Pengguna"
+                        >
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </form>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Tambah Pengguna Baru -->
+<div id="addUserModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-user-plus"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-900">Tambah Pengguna Baru</h3>
+      </div>
+      <button type="button" onclick="closeModal('addUserModal')" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form action="/users/create" method="POST" class="space-y-3">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap</label>
+        <input type="text" name="nama" required placeholder="Contoh: Muhammad Fajar" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username</label>
+          <input type="text" name="username" required placeholder="fajar_rpl" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+          <input type="password" name="password" required placeholder="••••••••" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Role / Hak Akses</label>
+        <select name="role" required class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="PEMINJAM">PEMINJAM (Siswa / Guru)</option>
+          <option value="TOOLMAN">TOOLMAN (Laboran Alat)</option>
+          <option value="ADMIN">ADMIN (Kepala Lab Komputer / IT)</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">NISN / NIP</label>
+          <input type="text" name="nisn" placeholder="0061234567" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">No. WhatsApp</label>
+          <input type="text" name="telepon" placeholder="0812-xxxx-xxxx" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-3">
+        <button type="button" onclick="closeModal('addUserModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">
+          Batal
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20">
+          Simpan Pengguna
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Edit Pengguna -->
+<div id="editUserModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-900">Edit Pengguna</h3>
+      </div>
+      <button type="button" onclick="closeModal('editUserModal')" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form id="editUserForm" method="POST" class="space-y-3">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap</label>
+        <input type="text" name="nama" id="editNama" required class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Role / Hak Akses</label>
+        <select name="role" id="editRole" required class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="PEMINJAM">PEMINJAM (Siswa / Guru)</option>
+          <option value="TOOLMAN">TOOLMAN (Laboran Alat)</option>
+          <option value="ADMIN">ADMIN (Kepala Lab Komputer / IT)</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">NISN / NIP</label>
+          <input type="text" name="nisn" id="editNisn" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">No. WhatsApp</label>
+          <input type="text" name="telepon" id="editTelepon" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password Baru (Opsional)</label>
+        <input type="password" name="newPassword" placeholder="Kosongkan jika tidak ingin mengubah password" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-3">
+        <button type="button" onclick="closeModal('editUserModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">
+          Batal
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20">
+          Perbarui Data
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openEditUserModal(id, username, nama, role, nisn, telepon) {
+    document.getElementById('editUserForm').action = '/users/' + id + '/update';
+    document.getElementById('editNama').value = nama;
+    document.getElementById('editRole').value = role;
+    document.getElementById('editNisn').value = nisn;
+    document.getElementById('editTelepon').value = telepon;
+    openModal('editUserModal');
+  }
+</script>
+
+<%- include('../partials/footer') %>

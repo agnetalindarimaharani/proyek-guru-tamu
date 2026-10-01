@@ -1,0 +1,252 @@
+<%- include('../partials/header') %>
+
+<div class="space-y-6">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Katalog & Stok Sarpras Laboratorium</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">Daftar inventaris sarana alat praktikum Lab RPL & Elektronika yang dapat dipinjam siswa dan guru.</p>
+    </div>
+    
+    <% if (user.role === 'PEMINJAM') { %>
+      <a href="/borrowings" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all inline-flex items-center space-x-2 self-start sm:self-auto">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>Peminjaman Saya</span>
+      </a>
+    <% } %>
+  </div>
+
+  <!-- Alerts -->
+  <% if (typeof success !== 'undefined' && success) { %>
+    <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-start space-x-2">
+      <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+      <span><%= success %></span>
+    </div>
+  <% } %>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-start space-x-2">
+      <i class="fa-solid fa-circle-exclamation text-rose-500 mt-0.5"></i>
+      <span><%= error %></span>
+    </div>
+  <% } %>
+
+  <!-- Search & Category Filter -->
+  <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+    <form action="/catalog" method="GET" class="w-full md:w-auto flex-grow flex flex-col sm:flex-row gap-2">
+      <div class="relative flex-grow max-w-md">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+        <input 
+          type="text" 
+          name="search" 
+          value="<%= search %>" 
+          placeholder="Cari nama alat praktikum, router, solder, proyektor..." 
+          class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        >
+      </div>
+
+      <select 
+        name="categoryId" 
+        onchange="this.form.submit()" 
+        class="py-2 px-3 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-slate-700"
+      >
+        <option value="">Semua Kategori Lab</option>
+        <% categories.forEach(cat => { %>
+          <option value="<%= cat.id %>" <%= filterCategoryId == cat.id ? 'selected' : '' %>>
+            <%= cat.namaKategori %>
+          </option>
+        <% }) %>
+      </select>
+
+      <button type="submit" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors">
+        Cari
+      </button>
+      <% if (search || filterCategoryId) { %>
+        <a href="/catalog" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors text-center">
+          Reset
+        </a>
+      <% } %>
+    </form>
+    <div class="text-xs text-slate-500 whitespace-nowrap">
+      Menampilkan <strong class="text-slate-800"><%= tools.length %></strong> Alat Lab
+    </div>
+  </div>
+
+  <!-- Cards Grid View -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <% if (tools.length === 0) { %>
+      <div class="col-span-full bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm text-slate-400">
+        <i class="fa-solid fa-box-open text-4xl mb-3 block text-slate-300"></i>
+        <p class="font-bold text-slate-600">Tidak ada alat praktikum yang sesuai pencarian.</p>
+        <p class="text-xs mt-1">Coba gunakan kata kunci lain atau pilih semua kategori.</p>
+      </div>
+    <% } else { %>
+      <% tools.forEach(t => { %>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-blue-400 transition-all group">
+          <div>
+            <!-- Header Card: Category & Stock Status -->
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 truncate">
+                <%= t.category.namaKategori %>
+              </span>
+              
+              <% if (t.stok > 0 && t.kondisi === 'BAIK') { %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                  <i class="fa-solid fa-circle text-[6px] mr-1 text-emerald-600"></i> Tersedia: <%= t.stok %>
+                </span>
+              <% } else if (t.kondisi !== 'BAIK') { %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">
+                  <i class="fa-solid fa-triangle-exclamation mr-1"></i> RUSAK
+                </span>
+              <% } else { %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
+                  Habis Dipinjam
+                </span>
+              <% } %>
+            </div>
+
+            <!-- Title & Specs -->
+            <h3 class="font-bold text-slate-900 text-sm leading-snug group-hover:text-blue-600 transition-colors">
+              <%= t.namaAlat %>
+            </h3>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+              <%= t.spesifikasi %>
+            </p>
+          </div>
+
+          <!-- Action Footer -->
+          <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[11px] font-medium text-slate-400 font-mono">
+              ID: #<%= t.id %>
+            </span>
+
+            <% if (user.role === 'PEMINJAM') { %>
+              <% if (t.stok > 0 && t.kondisi === 'BAIK') { %>
+                <button 
+                  type="button" 
+                  onclick="openBorrowModal(this)"
+                  data-id="<%= t.id %>"
+                  data-nama="<%= t.namaAlat %>"
+                  data-stok="<%= t.stok %>"
+                  class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm shadow-blue-600/20 transition-all inline-flex items-center space-x-1.5"
+                >
+                  <i class="fa-solid fa-hand-holding-hand"></i>
+                  <span>Pinjam Alat</span>
+                </button>
+              <% } else { %>
+                <button disabled class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs cursor-not-allowed">
+                  Tidak Tersedia
+                </button>
+              <% } %>
+            <% } else { %>
+              <span class="text-xs font-semibold text-slate-500">Stok: <%= t.stok %> Unit</span>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+</div>
+
+<!-- Modal Ajukan Pinjam Alat (Fitur 12) -->
+<div id="borrowModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-handshake"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-900">Ajukan Pinjam Alat</h3>
+      </div>
+      <button type="button" onclick="closeModal('borrowModal')" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form action="/borrowings/submit" method="POST" class="space-y-3">
+      <input type="hidden" name="toolId" id="modalToolId">
+
+      <div class="p-3 bg-blue-50 rounded-xl border border-blue-200 text-xs">
+        <p class="text-slate-500">Alat yang dipilih:</p>
+        <p class="font-bold text-blue-900 text-sm mt-0.5" id="modalToolName"></p>
+        <p class="text-[11px] text-blue-700 mt-1">Stok saat ini di lab: <strong id="modalToolStok"></strong> unit</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Jumlah Unit</label>
+          <input 
+            type="number" 
+            name="jumlah" 
+            id="modalJumlah" 
+            min="1" 
+            value="1" 
+            required 
+            class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Target Kembali</label>
+          <input 
+            type="date" 
+            name="tglKembaliRencana" 
+            id="modalReturnDate" 
+            required 
+            class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Keperluan Praktikum / Keterangan</label>
+        <textarea 
+          name="catatan" 
+          rows="2" 
+          required 
+          placeholder="Contoh: Praktikum Mikrotik Jaringan Komputer di Lab RPL 1"
+          class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        ></textarea>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2">
+        <button type="button" onclick="closeModal('borrowModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">
+          Batal
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20">
+          Kirim Pengajuan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dateStr = tomorrow.toISOString().split('T')[0];
+    const dateInput = document.getElementById('modalReturnDate');
+    if (dateInput) {
+      dateInput.value = dateStr;
+      dateInput.min = new Date().toISOString().split('T')[0];
+    }
+  });
+
+  function openBorrowModal(btn) {
+    const toolId = btn.getAttribute('data-id');
+    const toolName = btn.getAttribute('data-nama');
+    const stok = parseInt(btn.getAttribute('data-stok')) || 1;
+
+    document.getElementById('modalToolId').value = toolId;
+    document.getElementById('modalToolName').innerText = toolName;
+    document.getElementById('modalToolStok').innerText = stok;
+    const jumlahInput = document.getElementById('modalJumlah');
+    jumlahInput.value = 1;
+    jumlahInput.max = stok;
+    openModal('borrowModal');
+  }
+</script>
+
+<%- include('../partials/footer') %>

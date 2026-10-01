@@ -1,0 +1,356 @@
+<%- include('../partials/header') %>
+
+<div class="space-y-6">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Inventaris Alat Praktikum Laboratorium</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">Master data sarana peralatan praktikum lab: router, tester, crimping, solder, multimeter, dan proyektor.</p>
+    </div>
+    <button 
+      type="button" 
+      onclick="openModal('addToolModal')"
+      class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all inline-flex items-center space-x-2 self-start sm:self-auto"
+    >
+      <i class="fa-solid fa-plus"></i>
+      <span>Tambah Alat Inventaris Baru</span>
+    </button>
+  </div>
+
+  <!-- Alerts -->
+  <% if (typeof success !== 'undefined' && success) { %>
+    <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-start space-x-2">
+      <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+      <span><%= success %></span>
+    </div>
+  <% } %>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-start space-x-2">
+      <i class="fa-solid fa-circle-exclamation text-rose-500 mt-0.5"></i>
+      <span><%= error %></span>
+    </div>
+  <% } %>
+
+  <!-- Search & Category Filter Bar -->
+  <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+    <form action="/tools" method="GET" class="w-full sm:w-auto flex-grow flex flex-col sm:flex-row gap-2">
+      <div class="relative flex-grow max-w-md">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+        <input 
+          type="text" 
+          name="search" 
+          value="<%= search %>" 
+          placeholder="Cari nama alat praktikum atau spesifikasi..." 
+          class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        >
+      </div>
+
+      <select 
+        name="categoryId" 
+        onchange="this.form.submit()" 
+        class="py-2 px-3 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-slate-700"
+      >
+        <option value="">Semua Kategori</option>
+        <% categories.forEach(cat => { %>
+          <option value="<%= cat.id %>" <%= filterCategoryId == cat.id ? 'selected' : '' %>>
+            <%= cat.namaKategori %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select 
+        name="kondisi" 
+        onchange="this.form.submit()" 
+        class="py-2 px-3 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-slate-700"
+      >
+        <option value="">Semua Kondisi</option>
+        <option value="BAIK" <%= filterKondisi === 'BAIK' ? 'selected' : '' %>>Kondisi Baik</option>
+        <option value="RUSAK" <%= filterKondisi === 'RUSAK' ? 'selected' : '' %>>Kondisi Rusak</option>
+      </select>
+
+      <button type="submit" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors">
+        Filter
+      </button>
+      <% if (search || filterCategoryId || filterKondisi) { %>
+        <a href="/tools" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors text-center">
+          Reset
+        </a>
+      <% } %>
+    </form>
+    <div class="text-xs text-slate-500 whitespace-nowrap">
+      Total: <strong class="text-slate-800"><%= tools.length %></strong> Alat Lab
+    </div>
+  </div>
+
+  <!-- Tools Table -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-600">
+        <thead class="bg-slate-50 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+          <tr>
+            <th class="py-3 px-4">Nama Alat Praktikum</th>
+            <th class="py-3 px-4">Kategori Lab</th>
+            <th class="py-3 px-4">Spesifikasi & Keterangan</th>
+            <th class="py-3 px-4 text-center">Stok Unit</th>
+            <th class="py-3 px-4 text-center">Kondisi</th>
+            <th class="py-3 px-4 text-center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium">
+          <% if (tools.length === 0) { %>
+            <tr>
+              <td colspan="6" class="py-8 text-center text-slate-400">Tidak ada alat praktikum yang sesuai kriteria.</td>
+            </tr>
+          <% } else { %>
+            <% tools.forEach(t => { %>
+              <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="py-3 px-4">
+                  <div class="font-bold text-slate-900 text-sm"><%= t.namaAlat %></div>
+                  <div class="text-[10px] text-slate-400 font-mono">ID: #<%= t.id %></div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                    <%= t.category.namaKategori %>
+                  </span>
+                </td>
+                <td class="py-3 px-4 max-w-sm">
+                  <p class="text-slate-600 text-xs line-clamp-2"><%= t.spesifikasi %></p>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <span class="px-2.5 py-1 rounded-lg font-mono font-black text-xs <%= t.stok > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' %>">
+                    <%= t.stok %> Unit
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <% if (t.kondisi === 'BAIK') { %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                      <i class="fa-solid fa-circle-check mr-1"></i> BAIK
+                    </span>
+                  <% } else { %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">
+                      <i class="fa-solid fa-triangle-exclamation mr-1"></i> RUSAK
+                    </span>
+                  <% } %>
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <div class="flex items-center justify-center space-x-1.5">
+                    <!-- Edit Button -->
+                    <button 
+                      type="button" 
+                      onclick="openEditToolModal(this)"
+                      data-id="<%= t.id %>"
+                      data-nama="<%= t.namaAlat %>"
+                      data-category-id="<%= t.categoryId %>"
+                      data-stok="<%= t.stok %>"
+                      data-kondisi="<%= t.kondisi %>"
+                      data-spesifikasi="<%= t.spesifikasi %>"
+                      class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition-colors"
+                      title="Edit Alat"
+                    >
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+
+                    <!-- Delete Button -->
+                    <form action="/tools/<%= t.id %>/delete" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus alat <%= t.namaAlat %> dari inventaris?');">
+                      <button 
+                        type="submit" 
+                        class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors"
+                        title="Hapus Alat"
+                      >
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Tambah Alat Baru (Test Case 2) -->
+<div id="addToolModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-toolbox"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-900">Tambah Inventaris Alat Lab</h3>
+      </div>
+      <button type="button" onclick="closeModal('addToolModal')" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form action="/tools/create" method="POST" class="space-y-3">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Alat Praktikum</label>
+        <input 
+          type="text" 
+          name="namaAlat" 
+          required 
+          placeholder="Contoh: Mikrotik RouterBoard RB951Ui-2HnD" 
+          class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        >
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori Lab</label>
+          <select name="categoryId" required class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat.id %>"><%= cat.namaKategori %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Jumlah Stok Awal</label>
+          <input 
+            type="number" 
+            name="stok" 
+            min="0" 
+            value="5" 
+            required 
+            class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kondisi Fisik Alat</label>
+        <select name="kondisi" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="BAIK">✅ BAIK (Siap Praktikum)</option>
+          <option value="RUSAK">⚠️ RUSAK (Perlu Servis / Kalibrasi)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Spesifikasi Lengkap</label>
+        <textarea 
+          name="spesifikasi" 
+          rows="3" 
+          required
+          placeholder="Contoh: 5-Port Ethernet, Wireless AP 2.4GHz, USB port, PoE Out, Adaptor 24V 0.8A" 
+          class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        ></textarea>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2">
+        <button type="button" onclick="closeModal('addToolModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">
+          Batal
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20">
+          Simpan ke Inventaris
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Edit Alat -->
+<div id="editToolModal" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <h3 class="font-bold text-base text-slate-900">Edit Data Alat Praktikum</h3>
+      </div>
+      <button type="button" onclick="closeModal('editToolModal')" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <form id="editToolForm" method="POST" class="space-y-3">
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Alat Praktikum</label>
+        <input 
+          type="text" 
+          name="namaAlat" 
+          id="editNamaAlat" 
+          required 
+          class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        >
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori Lab</label>
+          <select name="categoryId" id="editCategoryId" required class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat.id %>"><%= cat.namaKategori %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Stok Unit</label>
+          <input 
+            type="number" 
+            name="stok" 
+            id="editStok" 
+            min="0" 
+            required 
+            class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Kondisi Fisik Alat</label>
+        <select name="kondisi" id="editKondisi" class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="BAIK">✅ BAIK (Siap Praktikum)</option>
+          <option value="RUSAK">⚠️ RUSAK (Perlu Servis / Kalibrasi)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Spesifikasi Lengkap</label>
+        <textarea 
+          name="spesifikasi" 
+          id="editSpesifikasi" 
+          rows="3" 
+          required 
+          class="w-full p-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        ></textarea>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2">
+        <button type="button" onclick="closeModal('editToolModal')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200">
+          Batal
+        </button>
+        <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20">
+          Perbarui Alat
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openEditToolModal(btn) {
+    const id = btn.getAttribute('data-id');
+    const nama = btn.getAttribute('data-nama');
+    const categoryId = btn.getAttribute('data-category-id');
+    const stok = btn.getAttribute('data-stok');
+    const kondisi = btn.getAttribute('data-kondisi');
+    const spesifikasi = btn.getAttribute('data-spesifikasi');
+
+    document.getElementById('editToolForm').action = '/tools/' + id + '/update';
+    document.getElementById('editNamaAlat').value = nama;
+    document.getElementById('editCategoryId').value = categoryId;
+    document.getElementById('editStok').value = stok;
+    document.getElementById('editKondisi').value = kondisi;
+    document.getElementById('editSpesifikasi').value = spesifikasi;
+    openModal('editToolModal');
+  }
+</script>
+
+<%- include('../partials/footer') %>
